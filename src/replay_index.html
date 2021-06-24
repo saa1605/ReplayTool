@@ -1,0 +1,38 @@
+<html>
+  <body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./example_log.js"></script>
+    <script src="./replay_fake.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <style>
+      #suggestionText {
+        /*color: rgb(158, 188, 226);*/
+        color: grey;
+        position: absolute;
+        top: 10;
+        left: 70;
+      }
+
+      #userText {
+        color: black;
+        position: absolute;
+        top: 10;
+        left: 70;
+        z-index: 2;
+        hyphens: auto;
+      }
+
+      #deletedText {
+        color: purple;
+        position: absolute;
+        top: 500;
+        left: 70;
+      }
+    </style>
+
+    <p id="userText"></p>
+    <p id="suggestionText"></p>
+  </body>
+</html>
