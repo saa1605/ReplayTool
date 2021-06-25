@@ -1,10 +1,4 @@
 $(document).ready(function () {
-  // const keys = data.keys
-  // const cursor_positions = data.cursor_positions
-  // const logs = data.logs.slice(1, data.logs.length)
-  // const suggestions = data.suggestions
-  // const accepted_suggestions = data.accepted_suggestions
-
   const keys = data["key"];
   const selectionEnd = data["selectionEnd"];
   const selectionStart = data["selectionStart"];
@@ -66,10 +60,19 @@ $(document).ready(function () {
 
   circleSize = [];
 
-  d = {};
-  d[-1] = 0;
-  d_start = {};
-  d_start[-1] = 0;
+  //d = {};
+  //d[-1] = 0;
+  //d_start = {};
+  //d_start[-1] = 0;
+
+  d = new Array(2000).fill(0);
+
+  function updateD(from) {
+    for (let i = from; i < d.length; i++) {
+      d[i] = d[from];
+    }
+  }
+
   function process() {
     for (idx = 0; idx < keys.length; idx++) {
       current_text = logs[idx];
@@ -88,34 +91,40 @@ $(document).ready(function () {
             accumalated_deletes.slice().reduce((a, b) => a + b, 0);
         }
 
-        // apparent_cursor_start = real_to_apparent_mapping_start[real_cursor_start];
-        // apparent_cursor_end = real_to_apparent_mapping_start[real_cursor_end];
-        // apparent_cursor_start = real_cursor_start + accumalated_deletes.slice().reduce((a, b) => a + b, 0);
-        // apparent_cursor_end = real_cursor_end + accumalated_deletes.slice().reduce((a, b) => a + b, 0);
-
-        if (!(real_cursor_end in d)) {
-          if (!(real_cursor_end - 1 in d)) {
-            d[real_cursor_end] = d[Object.keys(d).length - 2];
-          } else {
-            d[real_cursor_end] = d[real_cursor_end - 1];
-          }
-        } else if (d[real_cursor_end] < d[real_cursor_end - 1]) {
-          d[real_cursor_end] = d[real_cursor_end - 1];
-        }
-        d[real_cursor_end] += delete_counter;
-        // console.log(d[real_cursor_end])
-        for (let i = real_cursor_end; i < Object.keys(d).length; i++) {
-          if (d[i] < d[i - 1]) {
-            d[i] = d[i - 1];
-          }
+        //if (!(real_cursor_end in d)) {
+        //if (!(real_cursor_end - 1 in d)) {
+        //d[real_cursor_end] = d[Object.keys(d).length - 2];
+        //} else {
+        //d[real_cursor_end] = d[real_cursor_end - 1];
+        //}
+        //} else if (d[real_cursor_end] < d[real_cursor_end - 1]) {
+        //d[real_cursor_end] = d[real_cursor_end - 1];
+        //}
+        //d[real_cursor_end] += delete_counter;
+        //for (let i = real_cursor_end; i < Object.keys(d).length; i++) {
+        //if (d[i] < d[i - 1]) {
+        //d[i] = d[i - 1];
+        //}
+        //}
+        if (real_cursor_end > 0) {
+          d[real_cursor_end] += delete_counter;
+          console.log(
+            "inside update condition",
+            d[real_cursor_end],
+            delete_counter,
+            d.slice(real_cursor_end)
+          );
+          updateD(real_cursor_end);
         }
         apparent_cursor_end = real_cursor_end + d[real_cursor_end];
-        // console.log(apparent_cursor_end, apparent_cursor_end_2)
-        // real_to_apparent_mapping_start[real_cursor_start] = apparent_cursor_start
-        // real_to_apparent_mapping_end[real_cursor_end] = apparent_cursor_end
-        console.log(apparent_cursor_end, real_cursor_end, current_text);
-
-        // circleSize.splice(apparent_cursor_end, 0, duration[idx]);
+        console.log(
+          current_text,
+          d.slice(0, apparent_cursor_end + 5),
+          real_cursor_end,
+          apparent_cursor_end,
+          delete_counter,
+          keys[idx]
+        );
       } else {
         current_cursor = cursor_positions[idx]["end"];
       }
@@ -151,9 +160,10 @@ $(document).ready(function () {
                 tokens[apparent_cursor_end - delete_counter - 1] +
                 "</strike></span>";
               caps_flag = false;
-              delete_counter += 1;
-              accumalated_deletes.push(1);
 
+              delete_counter += 1;
+              console.log("Here", delete_counter);
+              accumalated_deletes.push(1);
             }
           } else {
             if (
@@ -189,72 +199,43 @@ $(document).ready(function () {
           let i = 0;
           for (i = 0; i < suggestion_tok.length; i++) {
             let t =
-              `<span style="color:green">` +
-              suggestion_tok[i] +
-              "</span>";
+              `<span style="color:green">` + suggestion_tok[i] + "</span>";
             tokens.splice(apparent_cursor_end + i, 0, t);
             d[real_cursor_end + i] = d[real_cursor_end];
           }
           break;
-        
-        // Left Arrow 
+
+        // Left Arrow
         case 37:
           delete_counter = 0;
           caps_flag = false;
           break;
 
-        // Right Arrow 
+        // Right Arrow
         case 39:
           delete_counter = 0;
           caps_flag = false;
           break;
 
-        // Newline 
+        // Newline
         case 13:
+          delete_counter = 0;
           tokens.splice(apparent_cursor_end, 0, "<br/>");
           caps_flag = false;
           break;
 
-        // Alphanumeric Characters  
+        // Alphanumeric Characters
         default:
           accumalated_deletes.push(0);
 
           let alphanumeric_tok = "";
-          if (apparent_cursor_end < lastPointer) {
-            alphanumeric_tok = "[" + current_text[real_cursor_end] + "]";
-          } else {
-            alphanumeric_tok = current_text[real_cursor_end];
-          }
+
+          alphanumeric_tok = current_text[real_cursor_end];
+
           caps_flag = false;
 
-          tokens.splice(
-            apparent_cursor_end,
-            0,
-            alphanumeric_tok
-          );
+          tokens.splice(apparent_cursor_end, 0, alphanumeric_tok);
 
-          // Uncomment Below code to generate static display of suggestions
-
-          // if (current_text != suggestionText[idx]) {
-          //   let extraText = suggestionText[idx].replace(current_text, '')
-          //   for (let i = 0; i < extraText.length; i++) {
-          //     d[real_cursor_end + i] = d[real_cursor_end] + extraText.length;
-          //     let t = "<span style=color:red>" + extraText[i] + "</span>";
-          //     tokens.splice(apparent_cursor_end + i, 0, t);
-          //   }
-          // }
-
-          // deletes_accumulated_so_far.splice(current_cursor, 0, 0)
-          //   if (real_cursor_end > 450 && real_cursor_end < 490) {
-          //     console.log(
-          //       { ...d },
-          //       current_text,
-          //       apparent_cursor_end,
-          //       real_cursor_end,
-          //       current_text[real_cursor_end],
-          //       delete_counter
-          //     );
-          //   }
           delete_counter = 0;
           break;
       }
