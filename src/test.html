@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <svg id="svg1" style="margin: 0 auto; display: block"></svg>
+    <svg><line id="line1" /></svg>
+    <script></script>
+  </head>
+  <body>
+    <div id="base; position: fixed" style="z-index: 1">
+      <span id="mainDiv">Some text</span>
+
+      <span id="otherDiv">Some other text</span>
+    </div>
+    <svg style="z-index: -2" id="overlay"></svg>
+    <script>
+      const mainDiv = document.getElementById("mainDiv");
+      const otherDiv = document.getElementById("otherDiv");
+      console.log(mainDiv.getBoundingClientRect());
+      const x1 = mainDiv.getBoundingClientRect().x;
+      const y1 = mainDiv.getBoundingClientRect().y;
+      const x2 = otherDiv.getBoundingClientRect().x;
+      const y2 = otherDiv.getBoundingClientRect().y;
+      d3.select("body")
+        .append("svg")
+        .append("line")
+        .attr("x1", x1)
+        .attr("y1", y1)
+        .attr("x2", x2)
+        .attr("y2", y2)
+        .style("stroke", "black")
+        .style("stroke-width", 2);
+    </script>
+  </body>
+</html>

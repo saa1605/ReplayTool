@@ -1,0 +1,57 @@
+<html>
+  <body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    <script src="../logs/aryaman_log.js"></script>
+    <script src="./linear_representation.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <style>
+      #suggestionText {
+        /*color: rgb(158, 188, 226);*/
+        color: grey;
+        position: absolute;
+        top: 10;
+        left: 70;
+      }
+
+      #userText {
+        position: absolute;
+        width: 611px;
+        height: 1000px;
+        left: 100px;
+        top: 65px;
+
+        font-family: "Fira Code",  monospace;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 250%;
+      }
+
+      #overlay {
+        position: absolute;
+        top: 65px;
+        left: 100px;
+        z-index: -5;
+        width: 611px;
+        height: 1000px;
+      }
+
+      #deletedText {
+        color: purple;
+        position: absolute;
+        top: 500;
+        left: 70;
+      }
+    </style>
+
+    <div id="userText"></div>
+    <div id="suggestionText"></div>
+    <svg id="overlay"></svg>
+  </body>
+</html>
