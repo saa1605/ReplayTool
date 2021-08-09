@@ -67,9 +67,14 @@ $(document).ready(function () {
 
   d = new Array(2000).fill(0);
 
-  function updateD(from) {
+  function updateD(from, dc) {
     for (let i = from; i < d.length; i++) {
-      d[i] = d[from];
+      if (d[i]<=d[from]){
+        d[i] = d[from]
+      } else {
+        d[i] = d[i] + dc;
+      }
+      
     }
   }
 
@@ -108,23 +113,10 @@ $(document).ready(function () {
         //}
         if (real_cursor_end > 0) {
           d[real_cursor_end] += delete_counter;
-          console.log(
-            "inside update condition",
-            d[real_cursor_end],
-            delete_counter,
-            d.slice(real_cursor_end)
-          );
-          updateD(real_cursor_end);
+          updateD(real_cursor_end, delete_counter);
         }
         apparent_cursor_end = real_cursor_end + d[real_cursor_end];
-        console.log(
-          current_text,
-          d.slice(0, apparent_cursor_end + 5),
-          real_cursor_end,
-          apparent_cursor_end,
-          delete_counter,
-          keys[idx]
-        );
+        console.log(current_text, apparent_cursor_end, apparent_cursor_start, real_cursor_end, real_cursor_start, d.slice(0, d.length))
       } else {
         current_cursor = cursor_positions[idx]["end"];
       }
@@ -133,36 +125,63 @@ $(document).ready(function () {
         case 8:
           if (show_deletes) {
             if (real_cursor_end != real_cursor_start) {
-              let upperbound = Math.max(
-                real_to_apparent_mapping_start[real_cursor_start],
-                real_to_apparent_mapping_end[real_cursor_end]
-              );
-              let lowerbound = Math.min(
-                real_to_apparent_mapping_start[real_cursor_start],
-                real_to_apparent_mapping_end[real_cursor_end]
-              );
-
-              for (
-                delete_counter = lowerbound;
-                delete_counter < upperbound;
-                delete_counter++
-              ) {
-                tokens[delete_counter] =
-                  '<span style="opacity:0.4"><strike>' +
-                  tokens[delete_counter] +
-                  "</strike></span>";
-                accumalated_deletes.splice(lowerbound, 0, 1);
-              }
-              delete_counter = 0;
-            } else {
-              tokens[apparent_cursor_end - delete_counter - 1] =
-                `<span style="opacity:0.4"><strike>` +
+              // console.log(keys[idx])
+              for(delete_counter=0; delete_counter<Math.abs(real_cursor_end-real_cursor_start); delete_counter++){
+               tokens[apparent_cursor_end-delete_counter-1] = `<span style="opacity:0.4"><strike>` +
                 tokens[apparent_cursor_end - delete_counter - 1] +
                 "</strike></span>";
-              caps_flag = false;
+                
+              }
+              updateD(real_cursor_end, delete_counter);
+              delete_counter=0;
+              // updateD(real_cursor_start);
+              // delete_counter = 0;
+              // let upperbound = Math.max(
+              //   real_to_apparent_mapping_start[real_cursor_start],
+              //   real_to_apparent_mapping_end[real_cursor_end]
+              // );
+              // let lowerbound = Math.min(
+              //   real_to_apparent_mapping_start[real_cursor_start],
+              //   real_to_apparent_mapping_end[real_cursor_end]
+              // );
 
-              delete_counter += 1;
-              console.log("Here", delete_counter);
+              // for (
+              //   delete_counter = lowerbound;
+              //   delete_counter < upperbound;
+              //   delete_counter++
+              // ) {
+              //   tokens[delete_counter] =
+              //     '<span style="opacity:0.4"><strike>' +
+              //     tokens[delete_counter] +
+              //     "</strike></span>";
+              //   accumalated_deletes.splice(lowerbound, 0, 1);
+              // }
+              // delete_counter = 0;
+            } else {
+              console.log(tokens[apparent_cursor_end - delete_counter - 1])
+              if(tokens[apparent_cursor_end - delete_counter - 1] !== undefined){
+                // console.log(tokens[apparent_cursor_end - delete_counter - 1])
+                while (
+                  tokens[apparent_cursor_end - delete_counter - 1].includes(
+                    "opacity"
+                  )
+                ) {
+                  delete_counter += 1;
+                  if(tokens[apparent_cursor_end - delete_counter - 1] == undefined){
+                    break;
+                  }
+                }
+              }
+    
+                tokens[apparent_cursor_end - delete_counter - 1] =
+                  `<span style="opacity:0.4"><strike>` +
+                  tokens[apparent_cursor_end - delete_counter - 1] +
+                  "</strike></span>";
+                   caps_flag = false;
+
+                delete_counter += 1
+               ;
+              
               accumalated_deletes.push(1);
             }
           } else {
@@ -261,7 +280,6 @@ $(document).ready(function () {
           "</span>"
       );
       // let size = ((duration[timestep] / 100).toString() + 'em')
-      // console.log(size)
       // $(".tokens").css('font-family', 'url("Fira Mono, Monospace")')
       // $(".tokens").css('background', 'url("yellow_circle.png"), no-repeat')
       // $(".tokens").css('background-size', size)
@@ -274,9 +292,6 @@ $(document).ready(function () {
 
   function linearRepresentation() {
     tokens = "";
-    console.log(
-      temporal_token_registry[temporal_token_registry.length - 1].join("")
-    );
     $("#userText").html(
       temporal_token_registry[temporal_token_registry.length - 1].join("")
     );
@@ -285,10 +300,8 @@ $(document).ready(function () {
     //   tokens =
     //     tokens + temporal_token_registry[temporal_token_registry.length - 1][i];
     // }
-    // console.log(tokens);
     // $("#userText").html(tokens);
     // for (let i = 0; i < temporal_token_registry.length; i++) {
-    //   console.log(circleSize);
 
     //   size = circleSize[i] / 100;
     //   if (size > 1) {
